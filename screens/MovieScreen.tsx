@@ -17,9 +17,44 @@ import Icon from '../components/Icon';
 
 import CustomText from '../components/CustomText';
 import regions from '../regions.json';
+import Database from '../utils/Database';
+
+const isFavorite = async id => {
+  const db = new Database();
+  let favorites = await db.get('favorites');
+  favorites = JSON.parse(favorites) || [];
+
+  return favorites.includes(id);
+};
+
+const addToHearts = async id => {
+  // Add to hearts
+  const database = new Database();
+  let favorites = await database.get('favorites');
+  console.log(favorites);
+
+  if (favorites !== null) {
+    favorites = JSON.parse(favorites);
+    favorites.push(id);
+    database.set('favorites', JSON.stringify(favorites));
+  } else {
+    database.set('favorites', JSON.stringify([id]));
+  }
+};
+
+const removeFromHearts = async id => {
+  // Remove from hearts
+  const database = new Database();
+  let favorites = await database.get('favorites');
+  favorites = JSON.parse(favorites);
+  favorites = favorites.filter(favorite => favorite !== id);
+  database.set('favorites', JSON.stringify(favorites));
+
+  console.log(favorites, id);
+};
 
 const MovieScreen = ({movieId, closeSheet}) => {
-  const {data, error, loading} = useMovie(movieId);
+  const {data, error, loading, isHearted} = useMovie(movieId);
 
   if (loading) {
     return <Loading />;
@@ -29,11 +64,11 @@ const MovieScreen = ({movieId, closeSheet}) => {
     return <Error />;
   }
 
-  return <Movie movie={data} close={closeSheet} />;
+  return <Movie movie={data} close={closeSheet} isHearted={isHearted} />;
 };
 
 // Path: Movie.tsx
-const Movie = ({movie, close}) => {
+const Movie = ({movie, close, isHearted}) => {
   const movieClip = movie.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -52,6 +87,7 @@ const Movie = ({movie, close}) => {
   const [items, setItems] = useState([
     {label: 'Where to Watch', value: 'watch'},
   ]);
+  const [isFavorite, setIsFavorite] = useState(isHearted);
 
   useEffect(() => {
     const getWatchProviders = async () => {
@@ -113,9 +149,22 @@ const Movie = ({movie, close}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <Pressable>
+          <Pressable
+            onPress={() => {
+              if (isFavorite) {
+                removeFromHearts(movie.id);
+                setIsFavorite(false);
+              } else {
+                addToHearts(movie.id);
+                setIsFavorite(true);
+              }
+            }}>
             <View style={styles.favoriteIcon}>
-              <Icon name="heart-outline" size={32} color="white" />
+              <Icon
+                name={isFavorite ? 'heart' : 'heart-outline'}
+                size={32}
+                color="white"
+              />
             </View>
           </Pressable>
         </View>
@@ -157,6 +206,7 @@ const useMovie = movieId => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isHearted, setIsHearted] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -170,9 +220,15 @@ const useMovie = movieId => {
         setError(error);
         setLoading(false);
       });
+
+    isFavorite(movieId)
+      .then(favorite => setIsHearted(favorite))
+      .catch(err => {
+        console.log(err);
+      });
   }, [movieId]);
 
-  return {data, error, loading};
+  return {data, error, loading, isHearted};
 };
 
 // Path: Loading.tsx
