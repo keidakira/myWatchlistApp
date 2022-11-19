@@ -1,25 +1,22 @@
 import React, {useState, useEffect} from 'react';
 import {
   ActivityIndicator,
-  Image,
   ImageBackground,
   Linking,
-  Pressable,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
 } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import Separator from '../components/Separator';
 import CustomButton from '../components/CustomButton';
 import Icon from '../components/Icon';
 
 import CustomText from '../components/CustomText';
-import regions from '../regions.json';
 import Database from '../utils/Database';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import {TouchableOpacity} from '@gorhom/bottom-sheet';
 import Config from 'react-native-config';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const isFavorite = async id => {
   const db = new Database();
@@ -84,25 +81,8 @@ const Movie = ({movie, close, isHearted}) => {
 
   // States
   const [viewOverview, setViewOverview] = useState(false);
-  const [watchProviders, setWatchProviders] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('watch');
-  const [items, setItems] = useState([
-    {label: 'Where to Watch', value: 'watch'},
-  ]);
   const [isFavorite, setIsFavorite] = useState(isHearted);
-
-  useEffect(() => {
-    const getWatchProviders = async () => {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${Config.API_KEY}`,
-      );
-      const data = await response.json();
-      setWatchProviders(data.results);
-    };
-
-    getWatchProviders();
-  }, [movie.id]);
+  const [currentMenu, setCurrentMenu] = useState(0);
 
   return (
     <View style={styles.container}>
@@ -111,40 +91,19 @@ const Movie = ({movie, close, isHearted}) => {
         source={{
           uri: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
         }}>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-          }}></View>
-        <Text
-          style={{
-            fontSize: 24,
-            color: 'white',
-            padding: 16,
-            position: 'absolute',
-            bottom: 0,
-            fontWeight: 'bold',
-          }}
-          numberOfLines={2}>
+        <View style={styles.imageBackdrop} />
+        <Text style={styles.movieTitle} numberOfLines={2}>
           {movie.title}
         </Text>
         <Icon
           name="close"
           size={24}
           color="white"
-          style={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-          }}
+          style={styles.closeIcon}
           onPress={close}
         />
       </ImageBackground>
-      <View style={styles.subContainer}>
+      <ScrollView style={styles.subContainer}>
         <View style={styles.row}>
           <CustomButton
             title="Watch Trailer"
@@ -182,25 +141,36 @@ const Movie = ({movie, close, isHearted}) => {
           </CustomText>
         </TouchableHighlight>
         <Separator />
-        <DropDownPicker
-          open={open}
-          value={value}
-          items={items}
-          setOpen={setOpen}
-          setValue={setValue}
-          setItems={setItems}
-          theme="DARK"
-          dropDownDirection="AUTO"
-          dropDownContainerStyle={styles.dropdownContainer}
-          style={styles.dropdown}
-          zIndex={1000}
-          disabled={true}
-        />
+        <View style={[styles.row, {justifyContent: 'flex-start'}]}>
+          <TouchableOpacity
+            onPress={() => {
+              setCurrentMenu(0);
+            }}
+            style={currentMenu === 0 ? styles.activeMenuItem : styles.menuItem}>
+            <Icon
+              name="earth"
+              size={24}
+              color="white"
+              style={{marginBottom: 8}}
+            />
+            <CustomText>Stream</CustomText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setCurrentMenu(1);
+            }}
+            style={currentMenu === 1 ? styles.activeMenuItem : styles.menuItem}>
+            <Icon
+              name="people"
+              size={24}
+              color="white"
+              style={{marginBottom: 8}}
+            />
+            <CustomText>Cast</CustomText>
+          </TouchableOpacity>
+        </View>
         <Separator />
-        {value === 'watch' && (
-          <WatchProviders watchProviders={watchProviders} />
-        )}
-      </View>
+      </ScrollView>
     </View>
   );
 };
@@ -237,7 +207,7 @@ const useMovie = movieId => {
 // Path: Loading.tsx
 const Loading = () => {
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <View style={styles.loading}>
       <ActivityIndicator size="large" color="red" />
     </View>
   );
@@ -248,74 +218,28 @@ const Error = () => {
   return <Text style={{color: 'black'}}>Error...</Text>;
 };
 
-// Path: WatchProviders.tsx
-const WatchProviders = ({watchProviders}) => {
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('US');
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    const countries = Object.keys(watchProviders).map(country => {
-      return {
-        label: regions.filter(r => r.alpha2 === country)[0].name,
-        value: country,
-      };
-    });
-
-    setItems(countries);
-  }, [watchProviders]);
-
-  return (
-    <>
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={items}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setItems}
-        theme="DARK"
-        dropDownDirection="AUTO"
-        dropDownContainerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        zIndex={100}
-        searchable={true}
-        searchTextInputProps={{placeholder: 'Search...', autoFocus: true}}
-      />
-
-      {watchProviders[value] && (
-        <View style={styles.watchProviders}>
-          {watchProviders[value].flatrate &&
-            watchProviders[value].flatrate.map(provider => (
-              <View style={styles.providerContainer} key={provider.provider_id}>
-                <Image
-                  key={provider.provider_id}
-                  style={styles.providerImage}
-                  source={{
-                    uri: `https://image.tmdb.org/t/p/w200${provider.logo_path}`,
-                  }}
-                />
-              </View>
-            ))}
-          {watchProviders[value].ads &&
-            watchProviders[value].ads.map(provider => (
-              <View style={styles.providerContainer} key={provider.provider_id}>
-                <Image
-                  key={provider.provider_id}
-                  style={styles.providerImage}
-                  source={{
-                    uri: `https://image.tmdb.org/t/p/w200${provider.logo_path}`,
-                  }}
-                />
-              </View>
-            ))}
-        </View>
-      )}
-    </>
-  );
-};
-
 const styles = StyleSheet.create({
+  imageBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  movieTitle: {
+    fontSize: 24,
+    color: 'white',
+    padding: 16,
+    position: 'absolute',
+    bottom: 0,
+    fontWeight: 'bold',
+  },
+  closeIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: 'black',
@@ -332,18 +256,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     borderColor: 'white',
   },
-  watchProviders: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingVertical: 8,
-  },
-  providerContainer: {
-    padding: 8,
-  },
-  providerImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 8,
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   row: {
     flexDirection: 'row',
@@ -355,6 +271,23 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 6,
     padding: 16,
+  },
+  activeMenuItem: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    marginVertical: 6,
+    flex: 1 / 3,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuItem: {
+    borderRadius: 8,
+    marginVertical: 6,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1 / 3,
   },
 });
 

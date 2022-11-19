@@ -447,19 +447,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     borderColor: 'white',
   },
-  watchProviders: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    paddingVertical: 8,
-  },
-  providerContainer: {
-    padding: 8,
-  },
-  providerImage: {
-    width: 72,
-    height: 72,
-    borderRadius: 8,
-  },
   loading: {
     flex: 1,
     justifyContent: 'center',
