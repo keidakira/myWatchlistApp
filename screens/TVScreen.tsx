@@ -4,11 +4,11 @@ import {
   Image,
   ImageBackground,
   Linking,
+  Pressable,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import DropDownPicker from 'react-native-dropdown-picker';
 import {
   FlatList,
   ScrollView,
@@ -61,7 +61,7 @@ const removeFromHearts = async id => {
 };
 
 const TVScreen = ({tvId, closeSheet}) => {
-  const {data, error, loading, isHearted, episodes} = useTV(tvId);
+  const {data, error, loading, isHearted, episodes, countries} = useTV(tvId);
 
   if (loading) {
     return <Loading />;
@@ -77,12 +77,13 @@ const TVScreen = ({tvId, closeSheet}) => {
       close={closeSheet}
       isHearted={isHearted}
       episodes={episodes}
+      countries={countries}
     />
   );
 };
 
 // Path: TV.tsx
-const TV = ({tv, close, isHearted, episodes: eps}) => {
+const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
   const tvClip = tv.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -99,6 +100,8 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
   const [currentMenu, setCurrentMenu] = useState(0);
   const [currentSeason, setCurrentSeason] = useState(1);
   const [showSeasonPicker, setShowSeasonPicker] = useState(false);
+  const [currCountry, setCurrCountry] = useState('United States');
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [episodes, setEpisodes] = useState(eps);
   const [sort, setSort] = useState(0);
 
@@ -266,6 +269,27 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
               </View>
             );
           })}
+
+        {/** Stream options */}
+        {currentMenu === 2 && (
+          <View style={{marginVertical: 24}}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowCountryPicker(true);
+              }}>
+              <View style={styles.seasonButton}>
+                <CustomText style={{color: 'white'}}>{currCountry}</CustomText>
+                <Icon
+                  name="chevron-down"
+                  size={12}
+                  color="white"
+                  style={{marginLeft: 8}}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
         <Separator />
       </ScrollView>
       {/** Season Picker */}
@@ -275,6 +299,16 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
           seasons={tv.number_of_seasons}
           setSeason={setCurrentSeason}
           setPicker={setShowSeasonPicker}
+        />
+      )}
+
+      {/** Country Picker */}
+      {currentMenu === 2 && showCountryPicker && (
+        <CountryPicker
+          streamingCountries={countries}
+          currCountry={currCountry}
+          setCountry={setCurrCountry}
+          setPicker={setShowCountryPicker}
         />
       )}
 
@@ -303,6 +337,92 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
         />
       )}
     </View>
+  );
+};
+
+const CountryPicker = ({
+  streamingCountries,
+  currCountry,
+  setCountry,
+  setPicker,
+}) => {
+  /**
+   * regions: [{"alpha2": "ZW", "alpha3": "ZWE", "countryCallingCodes": ["+263"], "currencies": ["USD", "ZAR", "BWP", "GBP", "EUR"], "emoji": "🇿🇼", "ioc": "ZIM", "languages": ["eng", "sna", "nde"], "name": "Zimbabwe", "status": "assigned"}]
+   * streamingCountries: 
+   * "US": {
+      "link": "https://www.themoviedb.org/tv/90669-1899/watch?locale=US",
+      "flatrate": [
+        {
+          "logo_path": "/t2yyOv40HZeVlLjYsCsPHnWLk4W.jpg",
+          "provider_id": 8,
+          "provider_name": "Netflix",
+          "display_priority": 0
+        },
+        {
+          "logo_path": "/mShqQVDhHoK7VUbfYG3Un6xE8Mv.jpg",
+          "provider_id": 1796,
+          "provider_name": "Netflix basic with Ads",
+          "display_priority": 219
+        }
+      ]
+    },
+   */
+  let countries = [];
+  for (let country in streamingCountries) {
+    countries.push({
+      id: country,
+      ...streamingCountries[country],
+      name: regions.filter(r => r.alpha2 === country)[0].name.split(',')[0],
+    });
+  }
+
+  countries.push({
+    id: 'all',
+    name: '',
+  });
+
+  const [activeCountry, setActiveCountry] = useState(currCountry);
+
+  return (
+    <>
+      <View style={styles.seasonPicker}>
+        <FlatList
+          data={countries}
+          keyExtractor={item => item.id}
+          style={{marginBottom: 80, paddingTop: 40}}
+          contentContainerStyle={{
+            justifyContent: 'center',
+          }}
+          renderItem={({item, index}) => {
+            return (
+              <Pressable
+                key={index}
+                style={styles.season}
+                onPress={() => {
+                  setActiveCountry(item.name);
+                }}>
+                <CustomText
+                  style={
+                    item.name === activeCountry
+                      ? styles.seasonPickerTextActive
+                      : styles.seasonPickerText
+                  }>
+                  {item.name}
+                </CustomText>
+              </Pressable>
+            );
+          }}
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.closePickerIcon}
+        onPress={() => {
+          setPicker(false);
+          setCountry(activeCountry);
+        }}>
+        <Icon name="close" size={24} color="black" />
+      </TouchableOpacity>
+    </>
   );
 };
 
@@ -359,6 +479,7 @@ const useTV = tvId => {
   const [loading, setLoading] = useState(true);
   const [isHearted, setIsHearted] = useState(false);
   const [episodes, setEpisodes] = useState(null);
+  const [countries, setCountries] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -385,6 +506,18 @@ const useTV = tvId => {
         setLoading(false);
       });
 
+    fetch(
+      `https://api.themoviedb.org/3/tv/90669/watch/providers?api_key=${Config.API_KEY}`,
+    )
+      .then(response => response.json())
+      .then(data => {
+        setCountries(data.results);
+      })
+      .catch(error => {
+        setError(error);
+        setLoading(false);
+      });
+
     isFavorite(tvId)
       .then(favorite => setIsHearted(favorite))
       .catch(err => {
@@ -392,7 +525,7 @@ const useTV = tvId => {
       });
   }, [tvId]);
 
-  return {data, error, loading, isHearted, episodes};
+  return {data, error, loading, isHearted, episodes, countries};
 };
 
 // Path: Loading.tsx
@@ -530,6 +663,7 @@ const styles = StyleSheet.create({
     fontSize: 28,
     color: 'white',
     fontWeight: '800',
+    textAlign: 'center',
   },
   closePickerIcon: {
     position: 'absolute',
