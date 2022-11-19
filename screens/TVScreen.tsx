@@ -9,7 +9,11 @@ import {
   View,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import {TouchableHighlight} from 'react-native-gesture-handler';
+import {
+  FlatList,
+  ScrollView,
+  TouchableHighlight,
+} from 'react-native-gesture-handler';
 import Icon from '../components/Icon';
 import Separator from '../components/Separator';
 import CustomButton from '../components/CustomButton';
@@ -55,7 +59,7 @@ const removeFromHearts = async id => {
 };
 
 const TVScreen = ({tvId, closeSheet}) => {
-  const {data, error, loading, isHearted} = useTV(tvId);
+  const {data, error, loading, isHearted, episodes} = useTV(tvId);
 
   if (loading) {
     return <Loading />;
@@ -65,11 +69,18 @@ const TVScreen = ({tvId, closeSheet}) => {
     return <Error />;
   }
 
-  return <TV tv={data} close={closeSheet} isHearted={isHearted} />;
+  return (
+    <TV
+      tv={data}
+      close={closeSheet}
+      isHearted={isHearted}
+      episodes={episodes}
+    />
+  );
 };
 
 // Path: TV.tsx
-const TV = ({tv, close, isHearted}) => {
+const TV = ({tv, close, isHearted, episodes: eps}) => {
   const tvClip = tv.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -82,25 +93,24 @@ const TV = ({tv, close, isHearted}) => {
 
   // States
   const [viewOverview, setViewOverview] = useState(false);
-  const [watchProviders, setWatchProviders] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('watch');
-  const [items, setItems] = useState([
-    {label: 'Where to Watch', value: 'watch'},
-  ]);
   const [isFavorite, setIsFavorite] = useState(isHearted);
+  const [currentMenu, setCurrentMenu] = useState(0);
+  const [currentSeason, setCurrentSeason] = useState(1);
+  const [showSeasonPicker, setShowSeasonPicker] = useState(false);
+  const [episodes, setEpisodes] = useState(eps);
 
+  // Get episodes if seasons change
   useEffect(() => {
-    const getWatchProviders = async () => {
+    const getEpisodes = async () => {
       const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${tv.id}/watch/providers?api_key=4f2917841238275498913fb9c85b266f`,
+        `https://api.themoviedb.org/3/tv/${tv.id}/season/${currentSeason}?api_key=4f2917841238275498913fb9c85b266f`,
       );
       const data = await response.json();
-      setWatchProviders(data.results);
+      setEpisodes(data.episodes);
     };
 
-    getWatchProviders();
-  }, [tv.id]);
+    getEpisodes();
+  }, [currentSeason, tv.id]);
 
   return (
     <View style={styles.container}>
@@ -121,7 +131,7 @@ const TV = ({tv, close, isHearted}) => {
           onPress={close}
         />
       </ImageBackground>
-      <View style={styles.subContainer}>
+      <ScrollView style={styles.subContainer}>
         <View style={styles.row}>
           <CustomButton
             title="Watch Trailer"
@@ -159,26 +169,159 @@ const TV = ({tv, close, isHearted}) => {
           </CustomText>
         </TouchableHighlight>
         <Separator />
-        <DropDownPicker
-          open={open}
-          value={value}
-          items={items}
-          setOpen={setOpen}
-          setValue={setValue}
-          setItems={setItems}
-          theme="DARK"
-          dropDownDirection="AUTO"
-          dropDownContainerStyle={styles.dropdownContainer}
-          style={styles.dropdown}
-          zIndex={1000}
-          disabled={true}
-        />
-        <Separator />
-        {value === 'watch' && (
-          <WatchProviders watchProviders={watchProviders} />
+        <View style={styles.row}>
+          <TouchableOpacity
+            onPress={() => {
+              setCurrentMenu(0);
+            }}
+            style={currentMenu === 0 ? styles.activeMenuItem : styles.menuItem}>
+            <Icon
+              name="play"
+              size={24}
+              color="white"
+              style={{marginBottom: 8}}
+            />
+            <CustomText>Episodes</CustomText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setCurrentMenu(2);
+            }}
+            style={currentMenu === 2 ? styles.activeMenuItem : styles.menuItem}>
+            <Icon
+              name="earth"
+              size={24}
+              color="white"
+              style={{marginBottom: 8}}
+            />
+            <CustomText>Stream</CustomText>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setCurrentMenu(1);
+            }}
+            style={currentMenu === 1 ? styles.activeMenuItem : styles.menuItem}>
+            <Icon
+              name="people"
+              size={24}
+              color="white"
+              style={{marginBottom: 8}}
+            />
+            <CustomText>Cast</CustomText>
+          </TouchableOpacity>
+        </View>
+
+        {/** Episodes */}
+        {episodes && currentMenu === 0 && (
+          <View style={{marginVertical: 24}}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowSeasonPicker(true);
+              }}>
+              <View style={styles.seasonButton}>
+                <CustomText style={{color: 'white'}}>
+                  {'Season ' + currentSeason}
+                </CustomText>
+                <Icon
+                  name="chevron-down"
+                  size={12}
+                  color="white"
+                  style={{marginLeft: 8}}
+                />
+              </View>
+            </TouchableOpacity>
+          </View>
         )}
-      </View>
+        {episodes &&
+          currentMenu === 0 &&
+          episodes.map(ep => {
+            if (ep.still_path === null) {
+              return null;
+            }
+
+            return (
+              <>
+                <View style={styles.row}>
+                  <Image
+                    source={{
+                      uri: `https://image.tmdb.org/t/p/w500${ep.still_path}`,
+                    }}
+                    style={styles.episodeImage}
+                  />
+                  <View style={styles.episode}>
+                    <CustomText style={styles.episodeTitle} numberOfLines={1}>
+                      {ep.episode_number + '. ' + ep.name}
+                    </CustomText>
+                    <CustomText
+                      numberOfLines={3}
+                      style={styles.episodeOverview}>
+                      {ep.overview.replace(/(\r \n|\n|\r)/gm, ' ')}
+                    </CustomText>
+                  </View>
+                </View>
+                <Separator />
+              </>
+            );
+          })}
+        <Separator />
+      </ScrollView>
+      {/** Season Picker */}
+      {showSeasonPicker && (
+        <SeasonPicker
+          curr={currentSeason}
+          seasons={tv.number_of_seasons}
+          setSeason={setCurrentSeason}
+          setPicker={setShowSeasonPicker}
+        />
+      )}
     </View>
+  );
+};
+
+const SeasonPicker = ({seasons, curr, setSeason, setPicker}) => {
+  const [currentSeason, setCurrentSeason] = useState(curr);
+
+  return (
+    <>
+      <View style={styles.seasonPicker}>
+        <FlatList
+          data={Array.from(Array(seasons).keys())}
+          keyExtractor={item => item.toString()}
+          style={{marginBottom: 80, marginTop: 40}}
+          contentContainerStyle={{
+            flex: seasons <= 10 ? 1 : 0,
+            justifyContent: 'center',
+          }}
+          renderItem={({item}) => {
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  setCurrentSeason(item + 1);
+                }}
+                key={item}
+                style={styles.season}>
+                <CustomText
+                  style={
+                    currentSeason === item + 1
+                      ? styles.seasonPickerTextActive
+                      : styles.seasonPickerText
+                  }>
+                  {'Season ' + (item + 1)}
+                </CustomText>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.closePickerIcon}
+        onPress={() => {
+          setSeason(currentSeason);
+          setPicker(false);
+        }}>
+        <Icon name="close" size={24} color="black" />
+      </TouchableOpacity>
+    </>
   );
 };
 
@@ -187,6 +330,7 @@ const useTV = tvId => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isHearted, setIsHearted] = useState(false);
+  const [episodes, setEpisodes] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -201,6 +345,18 @@ const useTV = tvId => {
         setLoading(false);
       });
 
+    fetch(
+      `https://api.themoviedb.org/3/tv/${tvId}/season/1?api_key=4f2917841238275498913fb9c85b266f`,
+    )
+      .then(response => response.json())
+      .then(data => {
+        setEpisodes(data.episodes);
+      })
+      .catch(error => {
+        setError(error);
+        setLoading(false);
+      });
+
     isFavorite(tvId)
       .then(favorite => setIsHearted(favorite))
       .catch(err => {
@@ -208,13 +364,13 @@ const useTV = tvId => {
       });
   }, [tvId]);
 
-  return {data, error, loading, isHearted};
+  return {data, error, loading, isHearted, episodes};
 };
 
 // Path: Loading.tsx
 const Loading = () => {
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <View style={styles.loading}>
       <ActivityIndicator size="large" color="red" />
     </View>
   );
@@ -223,73 +379,6 @@ const Loading = () => {
 // Path: Error.tsx
 const Error = () => {
   return <CustomText>Error...</CustomText>;
-};
-
-// Path: WatchProviders.tsx
-const WatchProviders = ({watchProviders}) => {
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('US');
-  const [items, setItems] = useState([]);
-
-  useEffect(() => {
-    const countries = Object.keys(watchProviders).map(country => {
-      return {
-        label: regions.filter(r => r.alpha2 === country)[0].name,
-        value: country,
-      };
-    });
-
-    setItems(countries);
-  }, [watchProviders]);
-
-  return (
-    <>
-      <DropDownPicker
-        open={open}
-        value={value}
-        items={items}
-        setOpen={setOpen}
-        setValue={setValue}
-        setItems={setItems}
-        theme="DARK"
-        dropDownDirection="AUTO"
-        dropDownContainerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        zIndex={100}
-        searchable={true}
-        searchTextInputProps={{placeholder: 'Search...', autoFocus: true}}
-      />
-
-      {watchProviders[value] && (
-        <View style={styles.watchProviders}>
-          {watchProviders[value].flatrate &&
-            watchProviders[value].flatrate.map(provider => (
-              <View style={styles.providerContainer} key={provider.provider_id}>
-                <Image
-                  key={provider.provider_id}
-                  style={styles.providerImage}
-                  source={{
-                    uri: `https://image.tmdb.org/t/p/w200${provider.logo_path}`,
-                  }}
-                />
-              </View>
-            ))}
-          {watchProviders[value].ads &&
-            watchProviders[value].ads.map(provider => (
-              <View style={styles.providerContainer} key={provider.provider_id}>
-                <Image
-                  key={provider.provider_id}
-                  style={styles.providerImage}
-                  source={{
-                    uri: `https://image.tmdb.org/t/p/w200${provider.logo_path}`,
-                  }}
-                />
-              </View>
-            ))}
-        </View>
-      )}
-    </>
-  );
 };
 
 const styles = StyleSheet.create({
@@ -343,6 +432,11 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 8,
   },
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -353,6 +447,82 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginVertical: 6,
     padding: 16,
+  },
+  activeMenuItem: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    marginVertical: 6,
+    flex: 1 / 3,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuItem: {
+    borderRadius: 8,
+    marginVertical: 6,
+    padding: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1 / 3,
+  },
+  episodeImage: {
+    width: 120,
+    aspectRatio: 16 / 9,
+    borderRadius: 8,
+  },
+  episode: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  episodeTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  episodeOverview: {
+    fontSize: 10,
+  },
+  seasonButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    padding: 16,
+  },
+  seasonPicker: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    padding: 16,
+  },
+  season: {
+    padding: 16,
+  },
+  seasonPickerText: {
+    fontSize: 24,
+    color: 'gray',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  seasonPickerTextActive: {
+    fontSize: 28,
+    color: 'white',
+    fontWeight: '800',
+  },
+  closePickerIcon: {
+    position: 'absolute',
+    bottom: 32,
+    left: '50%',
+    transform: [{translateX: -30}],
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    padding: 16,
+    borderRadius: 32,
   },
 });
 
