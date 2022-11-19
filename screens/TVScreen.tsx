@@ -243,8 +243,8 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
             }
 
             return (
-              <>
-                <View style={styles.row} key={ep.id}>
+              <View key={ep.id}>
+                <View style={styles.row}>
                   <Image
                     source={{
                       uri: `https://image.tmdb.org/t/p/w500${ep.still_path}`,
@@ -263,7 +263,7 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
                   </View>
                 </View>
                 <Separator />
-              </>
+              </View>
             );
           })}
         <Separator />
