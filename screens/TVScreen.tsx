@@ -18,6 +18,7 @@ import CustomButton from '../components/CustomButton';
 import CustomText from '../components/CustomText';
 import regions from '../regions.json';
 import Database from '../utils/Database';
+import {TouchableOpacity} from '@gorhom/bottom-sheet';
 
 const isFavorite = async id => {
   const db = new Database();
@@ -129,7 +130,7 @@ const TV = ({tv, close, isHearted}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <Pressable
+          <TouchableOpacity
             onPress={() => {
               if (isFavorite) {
                 removeFromHearts(tv.id);
@@ -146,7 +147,7 @@ const TV = ({tv, close, isHearted}) => {
                 color="white"
               />
             </View>
-          </Pressable>
+          </TouchableOpacity>
         </View>
         <TouchableHighlight
           onPress={() => {

@@ -18,6 +18,7 @@ import Icon from '../components/Icon';
 import CustomText from '../components/CustomText';
 import regions from '../regions.json';
 import Database from '../utils/Database';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 const isFavorite = async id => {
   const db = new Database();
@@ -150,7 +151,7 @@ const Movie = ({movie, close, isHearted}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <Pressable
+          <TouchableOpacity
             onPress={() => {
               if (isFavorite) {
                 removeFromHearts(movie.id);
@@ -167,7 +168,7 @@ const Movie = ({movie, close, isHearted}) => {
                 color="white"
               />
             </View>
-          </Pressable>
+          </TouchableOpacity>
         </View>
         <TouchableHighlight
           onPress={() => {

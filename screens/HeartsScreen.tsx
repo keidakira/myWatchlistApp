@@ -105,7 +105,8 @@ const styles = StyleSheet.create({
   },
   title: {
     color: 'white',
-    fontSize: 24,
+    fontSize: 36,
+    fontWeight: 'bold',
   },
   container: {
     flex: 1,
