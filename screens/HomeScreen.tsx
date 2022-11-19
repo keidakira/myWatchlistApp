@@ -79,7 +79,7 @@ const HomeScreen = () => {
                     <Image
                       style={styles.posterImage}
                       source={{
-                        uri: `https://image.tmdb.org/t/p/w200${item.poster_path}`,
+                        uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
                       }}
                     />
                   </View>
@@ -104,7 +104,7 @@ const HomeScreen = () => {
                     <Image
                       style={styles.posterImage}
                       source={{
-                        uri: `https://image.tmdb.org/t/p/w200${item.poster_path}`,
+                        uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
                       }}
                     />
                   </View>
@@ -178,8 +178,8 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   posterImage: {
-    width: 128,
     aspectRatio: 2 / 3,
+    height: 256,
     resizeMode: 'contain',
     borderRadius: 8,
   },

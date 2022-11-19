@@ -8,7 +8,6 @@ import {
   View,
 } from 'react-native';
 import CustomText from '../components/CustomText';
-import Icon from '../components/Icon';
 import Separator from '../components/Separator';
 import Database from '../utils/Database';
 import MovieScreen from './MovieScreen';
