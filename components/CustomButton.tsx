@@ -1,9 +1,9 @@
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 
-const CustomButton = ({title, onPress, icon}) => {
+const CustomButton = ({title, onPress, icon, style}) => {
   return (
-    <TouchableOpacity style={styles.button} onPress={onPress}>
+    <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
       {icon && <IonIcon name={icon} size={24} color="black" />}
       {icon && <View style={styles.seperator}></View>}
       <Text style={styles.buttonText}>{title}</Text>

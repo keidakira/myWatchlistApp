@@ -4,6 +4,7 @@ import {
   Image,
   ImageBackground,
   Linking,
+  Pressable,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -105,12 +106,26 @@ const Movie = ({movie, close}) => {
         />
       </ImageBackground>
       <View style={styles.subContainer}>
-        <CustomButton title="Watch Trailer" icon="play" onPress={openTrailer} />
+        <View style={styles.row}>
+          <CustomButton
+            title="Watch Trailer"
+            icon="play"
+            onPress={openTrailer}
+            style={{flex: 7.5 / 8}}
+          />
+          <Pressable>
+            <View style={styles.favoriteIcon}>
+              <Icon name="heart-outline" size={32} color="white" />
+            </View>
+          </Pressable>
+        </View>
         <TouchableHighlight
           onPress={() => {
             setViewOverview(!viewOverview);
           }}>
-          <CustomText numberOfLines={viewOverview ? undefined : 4}>
+          <CustomText
+            numberOfLines={viewOverview ? undefined : 4}
+            style={{textAlign: 'justify'}}>
             {movie.overview}
           </CustomText>
         </TouchableHighlight>
@@ -270,6 +285,17 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 8,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  favoriteIcon: {
+    textAlign: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    marginVertical: 6,
+    padding: 16,
   },
 });
 
