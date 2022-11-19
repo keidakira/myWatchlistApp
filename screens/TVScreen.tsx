@@ -22,6 +22,7 @@ import CustomText from '../components/CustomText';
 import regions from '../regions.json';
 import Database from '../utils/Database';
 import {TouchableOpacity} from '@gorhom/bottom-sheet';
+import FAB from '../components/FAB';
 
 const isFavorite = async id => {
   const db = new Database();
@@ -98,6 +99,7 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
   const [currentSeason, setCurrentSeason] = useState(1);
   const [showSeasonPicker, setShowSeasonPicker] = useState(false);
   const [episodes, setEpisodes] = useState(eps);
+  const [sort, setSort] = useState(0);
 
   // Get episodes if seasons change
   useEffect(() => {
@@ -274,6 +276,27 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
           setPicker={setShowSeasonPicker}
         />
       )}
+
+      <FAB
+        icon={sort === 0 ? 'sort-numeric-ascending' : 'sort-numeric-descending'}
+        onPress={() => {
+          if (sort === 1) {
+            setSort(0);
+            setEpisodes(
+              episodes.sort((a, b) => {
+                return a.episode_number - b.episode_number;
+              }),
+            );
+          } else {
+            setSort(1);
+            setEpisodes(
+              episodes.sort((a, b) => {
+                return b.episode_number - a.episode_number;
+              }),
+            );
+          }
+        }}
+      />
     </View>
   );
 };
@@ -500,6 +523,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.75)',
     padding: 16,
+    zIndex: 9999,
   },
   season: {
     padding: 16,
@@ -523,6 +547,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.75)',
     padding: 16,
     borderRadius: 32,
+    zIndex: 9999,
   },
 });
 
