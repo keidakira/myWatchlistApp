@@ -22,23 +22,27 @@ import Database from '../utils/Database';
 const isFavorite = async id => {
   const db = new Database();
   let favorites = await db.get('favorites');
-  favorites = JSON.parse(favorites) || [];
+  favorites = JSON.parse(favorites) || {};
+  console.log(favorites);
 
-  return favorites.includes(id);
+  return favorites[id] || false;
 };
 
-const addToHearts = async id => {
+const addToHearts = async (id, poster) => {
   // Add to hearts
   const database = new Database();
   let favorites = await database.get('favorites');
 
-  if (favorites !== null) {
-    favorites = JSON.parse(favorites);
-    favorites.push(id);
-    database.set('favorites', JSON.stringify(favorites));
-  } else {
-    database.set('favorites', JSON.stringify([id]));
-  }
+  favorites = JSON.parse(favorites) || {};
+  console.log(id, poster);
+
+  favorites[id] = {
+    id: id,
+    poster: poster,
+    media_type: 'tv',
+  };
+
+  const response = await database.set('favorites', JSON.stringify(favorites));
 };
 
 const removeFromHearts = async id => {
@@ -46,7 +50,7 @@ const removeFromHearts = async id => {
   const database = new Database();
   let favorites = await database.get('favorites');
   favorites = JSON.parse(favorites);
-  favorites = favorites.filter(favorite => favorite !== id);
+  delete favorites[id];
   database.set('favorites', JSON.stringify(favorites));
 };
 
@@ -131,7 +135,7 @@ const TV = ({tv, close, isHearted}) => {
                 removeFromHearts(tv.id);
                 setIsFavorite(false);
               } else {
-                addToHearts(tv.id);
+                addToHearts(tv.id, tv.poster_path);
                 setIsFavorite(true);
               }
             }}>

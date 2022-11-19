@@ -9,7 +9,7 @@ import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import Icon from './components/Icon';
 import SearchScreen from './screens/Search';
 import HomeScreen from './screens/HomeScreen';
-import AccountScreen from './screens/AccountScreen';
+import AccountStackScreen from './screens/AccountScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -59,8 +59,8 @@ const App = () => {
               }}
             />
             <Tab.Screen
-              name="Account"
-              component={AccountScreen}
+              name="AccountBase"
+              component={AccountStackScreen}
               options={{
                 tabBarLabel: 'Account',
                 tabBarIcon: ({focused, color}) => (

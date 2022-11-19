@@ -1,40 +1,77 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, StyleSheet, Pressable} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
 import CustomText from '../components/CustomText';
 import Icon from '../components/Icon';
 import Separator from '../components/Separator';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import HeartsScreen from './HeartsScreen';
 
-const AccountScreen = () => {
+// Use stack navigation to go to a new HeartsScreen.tsx
+
+const Stack = createNativeStackNavigator();
+
+const Account = ({navigation}) => {
+  useEffect(() => {
+    setTimeout(() => {
+      styles.container.opacity = 1;
+    }, 500);
+  }, []);
+
   return (
     <View style={styles.main}>
-      <View style={styles.profile}>
-        <Icon
-          name="ios-person-outline"
-          size={64}
-          color="white"
-          style={styles.circle}
-          onPress={undefined}
-        />
-        <Separator />
-        <Text style={styles.title}>Hey, Srinandan</Text>
-      </View>
-      <View style={styles.list}>
-        <Pressable>
-          <View style={styles.listItem}>
-            <Icon name="ios-heart-outline" size={24} color="white" />
-            <CustomText style={styles.listItemText}>Favorites</CustomText>
-          </View>
-        </Pressable>
-        <Separator />
-        <Pressable>
-          <View style={styles.listItem}>
-            <Icon name="ios-settings-outline" size={24} color="white" />
-            <CustomText style={styles.listItemText}>Settings</CustomText>
-          </View>
-        </Pressable>
+      <View style={styles.container}>
+        <View style={styles.profile}>
+          <Icon
+            name="ios-person-outline"
+            size={64}
+            color="white"
+            style={styles.circle}
+            onPress={undefined}
+          />
+          <Separator />
+          <Text style={styles.title}>Hey, Srinandan</Text>
+        </View>
+        <View style={styles.list}>
+          <Pressable
+            onPress={() => {
+              navigation.navigate('Hearts');
+            }}>
+            <View style={styles.listItem}>
+              <Icon name="ios-heart-outline" size={24} color="white" />
+              <CustomText style={styles.listItemText}>Favorites</CustomText>
+            </View>
+          </Pressable>
+          <Separator />
+          <Pressable>
+            <View style={styles.listItem}>
+              <Icon name="ios-settings-outline" size={24} color="white" />
+              <CustomText style={styles.listItemText}>Settings</CustomText>
+            </View>
+          </Pressable>
+        </View>
       </View>
     </View>
+  );
+};
+
+const AccountStackScreen = () => {
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Account"
+        component={Account}
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Hearts"
+        component={HeartsScreen}
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
   );
 };
 
@@ -43,6 +80,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     flex: 1,
     paddingHorizontal: 16,
+  },
+  container: {
+    flex: 1,
+    opacity: 1,
   },
   title: {
     color: 'white',
@@ -73,4 +114,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AccountScreen;
+export default AccountStackScreen;
