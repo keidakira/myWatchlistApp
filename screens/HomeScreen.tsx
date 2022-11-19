@@ -11,6 +11,7 @@ import {
 import Separator from '../components/Separator';
 import MovieScreen from './MovieScreen';
 import TVScreen from './TVScreen';
+import Config from 'react-native-config';
 
 const Header = () => {
   return (
@@ -32,9 +33,13 @@ const HomeScreen = () => {
   const [trendingMovies, setTrendingMovies] = useState({});
 
   const trendingSeriesURL =
-    'https://api.themoviedb.org/3/trending/tv/week?api_key=4f2917841238275498913fb9c85b266f&language=en-US&page=1';
+    'https://api.themoviedb.org/3/trending/tv/week?api_key=' +
+    Config.API_KEY +
+    '&language=en-US&page=1';
   const trendingMoviesURL =
-    'https://api.themoviedb.org/3/trending/movie/week?api_key=4f2917841238275498913fb9c85b266f&language=en-US&page=1';
+    'https://api.themoviedb.org/3/trending/movie/week?api_key=' +
+    Config.API_KEY +
+    '&language=en-US&page=1';
 
   useEffect(() => {
     async function getTrendingSeries() {

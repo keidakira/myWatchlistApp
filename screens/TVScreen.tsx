@@ -23,6 +23,7 @@ import regions from '../regions.json';
 import Database from '../utils/Database';
 import {TouchableOpacity} from '@gorhom/bottom-sheet';
 import FAB from '../components/FAB';
+import Config from 'react-native-config';
 
 const isFavorite = async id => {
   const db = new Database();
@@ -105,7 +106,7 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
   useEffect(() => {
     const getEpisodes = async () => {
       const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${tv.id}/season/${currentSeason}?api_key=4f2917841238275498913fb9c85b266f`,
+        `https://api.themoviedb.org/3/tv/${tv.id}/season/${currentSeason}?api_key=${Config.API_KEY}`,
       );
       const data = await response.json();
       setEpisodes(data.episodes);
@@ -243,7 +244,7 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
 
             return (
               <>
-                <View style={styles.row}>
+                <View style={styles.row} key={ep.id}>
                   <Image
                     source={{
                       uri: `https://image.tmdb.org/t/p/w500${ep.still_path}`,
@@ -277,26 +278,30 @@ const TV = ({tv, close, isHearted, episodes: eps}) => {
         />
       )}
 
-      <FAB
-        icon={sort === 0 ? 'sort-numeric-ascending' : 'sort-numeric-descending'}
-        onPress={() => {
-          if (sort === 1) {
-            setSort(0);
-            setEpisodes(
-              episodes.sort((a, b) => {
-                return a.episode_number - b.episode_number;
-              }),
-            );
-          } else {
-            setSort(1);
-            setEpisodes(
-              episodes.sort((a, b) => {
-                return b.episode_number - a.episode_number;
-              }),
-            );
+      {currentMenu === 0 && (
+        <FAB
+          icon={
+            sort === 0 ? 'sort-numeric-ascending' : 'sort-numeric-descending'
           }
-        }}
-      />
+          onPress={() => {
+            if (sort === 1) {
+              setSort(0);
+              setEpisodes(
+                episodes.sort((a, b) => {
+                  return a.episode_number - b.episode_number;
+                }),
+              );
+            } else {
+              setSort(1);
+              setEpisodes(
+                episodes.sort((a, b) => {
+                  return b.episode_number - a.episode_number;
+                }),
+              );
+            }
+          }}
+        />
+      )}
     </View>
   );
 };
@@ -369,7 +374,7 @@ const useTV = tvId => {
       });
 
     fetch(
-      `https://api.themoviedb.org/3/tv/${tvId}/season/1?api_key=4f2917841238275498913fb9c85b266f`,
+      `https://api.themoviedb.org/3/tv/${tvId}/season/1?api_key=${Config.API_KEY}`,
     )
       .then(response => response.json())
       .then(data => {

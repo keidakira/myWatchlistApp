@@ -19,6 +19,7 @@ import CustomText from '../components/CustomText';
 import regions from '../regions.json';
 import Database from '../utils/Database';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import Config from 'react-native-config';
 
 const isFavorite = async id => {
   const db = new Database();
@@ -94,7 +95,7 @@ const Movie = ({movie, close, isHearted}) => {
   useEffect(() => {
     const getWatchProviders = async () => {
       const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=4f2917841238275498913fb9c85b266f`,
+        `https://api.themoviedb.org/3/movie/${movie.id}/watch/providers?api_key=${Config.API_KEY}`,
       );
       const data = await response.json();
       setWatchProviders(data.results);
