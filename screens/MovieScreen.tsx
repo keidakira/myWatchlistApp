@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   Linking,
@@ -161,7 +162,11 @@ const useMovie = movieId => {
 
 // Path: Loading.tsx
 const Loading = () => {
-  return <Text style={{color: 'black'}}>Loading...</Text>;
+  return (
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ActivityIndicator size="large" color="red" />
+    </View>
+  );
 };
 
 // Path: Error.tsx

@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   Linking,
@@ -15,8 +16,6 @@ import CustomButton from '../components/CustomButton';
 
 import CustomText from '../components/CustomText';
 import regions from '../regions.json';
-
-import LoadingIcon from '../assets/images/loading.svg';
 
 const TVScreen = ({tvId, closeSheet}) => {
   const {data, error, loading} = useTV(tvId);
@@ -143,8 +142,8 @@ const useTV = tvId => {
 // Path: Loading.tsx
 const Loading = () => {
   return (
-    <View style={{width: 56, height: 56}}>
-      <CustomText>Loading...</CustomText>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <ActivityIndicator size="large" color="red" />
     </View>
   );
 };

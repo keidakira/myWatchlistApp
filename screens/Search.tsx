@@ -7,6 +7,7 @@ import {
   Image,
   StyleSheet,
   TouchableNativeFeedback,
+  ActivityIndicator,
 } from 'react-native';
 import Separator from '../components/Separator';
 import MovieScreen from './MovieScreen';
@@ -25,7 +26,7 @@ const SearchScreen = () => {
       setSearchResults([]);
       const response = await fetch(searchEndpoint + searchText);
       const json = await response.json();
-      setSearchResults(json.results);
+      setSearchResults(json.results.filter((item: any) => item.poster_path));
     }
 
     const delayFn = setTimeout(() => {
@@ -57,32 +58,40 @@ const SearchScreen = () => {
           autoCapitalize="none"
         />
         <Separator />
-        <FlatList
-          data={searchResults}
-          renderItem={({item}) => {
-            return (
-              item.poster_path && (
-                <TouchableNativeFeedback
-                  onPress={() => {
-                    setSelectedItem(item);
-                    bottomSheetRef.current?.present();
-                  }}>
-                  <Image
-                    style={styles.searchResultImage}
-                    source={{
-                      uri: `https://image.tmdb.org/t/p/w500/${item.poster_path}`,
-                    }}
-                    borderRadius={8}
-                  />
-                </TouchableNativeFeedback>
-              )
-            );
-          }}
-          keyExtractor={item => item.id}
-          numColumns={2}
-          columnWrapperStyle={{justifyContent: 'space-between'}}
-          ItemSeparatorComponent={() => <Separator />}
-        />
+        {searchResults.length > 0 ? (
+          <FlatList
+            data={searchResults}
+            renderItem={({item}) => {
+              return (
+                item.poster_path && (
+                  <TouchableNativeFeedback
+                    onPress={() => {
+                      setSelectedItem(item);
+                      bottomSheetRef.current?.present();
+                    }}>
+                    <Image
+                      style={styles.searchResultImage}
+                      source={{
+                        uri: `https://image.tmdb.org/t/p/w500/${item.poster_path}`,
+                      }}
+                      borderRadius={8}
+                    />
+                  </TouchableNativeFeedback>
+                )
+              );
+            }}
+            keyExtractor={item => item.id}
+            numColumns={2}
+            columnWrapperStyle={{justifyContent: 'space-between'}}
+            ItemSeparatorComponent={() => <Separator />}
+          />
+        ) : (
+          searchText !== '' && (
+            <View style={{marginTop: 32}}>
+              <ActivityIndicator size="large" color="red" />
+            </View>
+          )
+        )}
       </View>
       <BottomSheetModal
         index={0}
