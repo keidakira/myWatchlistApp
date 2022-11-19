@@ -129,7 +129,7 @@ const Movie = ({movie, close, isHearted}) => {
             fontWeight: 'bold',
           }}
           numberOfLines={2}>
-          {movie.original_title}
+          {movie.title}
         </Text>
         <Icon
           name="close"

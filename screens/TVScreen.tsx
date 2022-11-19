@@ -4,7 +4,6 @@ import {
   Image,
   ImageBackground,
   Linking,
-  Pressable,
   StyleSheet,
   Text,
   View,
