@@ -1,14 +1,7 @@
 import 'react-native-gesture-handler';
 
 import React from 'react';
-import {
-  Image,
-  SafeAreaView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {SafeAreaView, StatusBar, StyleSheet} from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -16,6 +9,7 @@ import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import Icon from './components/Icon';
 import SearchScreen from './screens/Search';
 import HomeScreen from './screens/HomeScreen';
+import AccountScreen from './screens/AccountScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -83,18 +77,6 @@ const App = () => {
         </SafeAreaView>
       </NavigationContainer>
     </BottomSheetModalProvider>
-  );
-};
-
-const AccountScreen = () => {
-  return (
-    <View style={styles.main}>
-      <View style={{flex: 1, alignItems: 'center'}}>
-        <Icon name="ios-person-outline" size={64} color="white" />
-        <View style={{marginTop: 16}}></View>
-        <Text style={styles.title}>Hey, Srinandan</Text>
-      </View>
-    </View>
   );
 };
 
