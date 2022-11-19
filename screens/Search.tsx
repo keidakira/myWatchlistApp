@@ -26,20 +26,15 @@ const SearchScreen = () => {
       const response = await fetch(searchEndpoint + searchText);
       const json = await response.json();
       setSearchResults(json.results);
-
-      console.log(json.results);
     }
 
     const delayFn = setTimeout(() => {
-      console.log('searching for ' + searchText);
+      console.log('Searching for ' + searchText);
       if (searchText.length > 3) {
         getSearchResults();
       } else {
         setSearchResults([]);
       }
-      console.log(searchResults);
-
-      console.log(searchResults);
     }, 1000);
 
     return () => clearTimeout(delayFn);

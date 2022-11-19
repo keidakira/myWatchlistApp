@@ -3,18 +3,17 @@ import {
   Image,
   ImageBackground,
   Linking,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableHighlight,
   View,
 } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import IonIcons from 'react-native-vector-icons/Ionicons';
 import Separator from '../components/Separator';
-import CustomButton from '../CustomButton';
+import CustomButton from '../components/CustomButton';
+import Icon from '../components/Icon';
 
-import CustomText from '../CustomText';
+import CustomText from '../components/CustomText';
 import regions from '../regions.json';
 
 const MovieScreen = ({movieId, closeSheet}) => {
@@ -92,7 +91,7 @@ const Movie = ({movie, close}) => {
           numberOfLines={2}>
           {movie.original_title}
         </Text>
-        <IonIcons
+        <Icon
           name="close"
           size={24}
           color="white"
@@ -101,9 +100,7 @@ const Movie = ({movie, close}) => {
             top: 8,
             right: 8,
           }}
-          onPress={() => {
-            close();
-          }}
+          onPress={close}
         />
       </ImageBackground>
       <View style={styles.subContainer}>

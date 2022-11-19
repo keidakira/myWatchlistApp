@@ -1,30 +1,21 @@
 import 'react-native-gesture-handler';
 
-import React, {useEffect, useMemo, useRef, useState} from 'react';
+import React from 'react';
 import {
-  FlatList,
   Image,
   SafeAreaView,
-  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
-  TouchableNativeFeedback,
   View,
 } from 'react-native';
 
 import {NavigationContainer} from '@react-navigation/native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import BottomSheet, {
-  BottomSheetModal,
-  BottomSheetModalProvider,
-} from '@gorhom/bottom-sheet';
-import MovieScreen from './screens/MovieScreen';
+import {BottomSheetModalProvider} from '@gorhom/bottom-sheet';
 import Icon from './components/Icon';
-import Separator from './components/Separator';
-import TVScreen from './screens/TVScreen';
 import SearchScreen from './screens/Search';
+import HomeScreen from './screens/HomeScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -95,116 +86,6 @@ const App = () => {
   );
 };
 
-const HomeScreen = () => {
-  const bottomSheetRef = useRef<BottomSheetModal>(null);
-
-  const [selectedItem, setSelectedItem] = useState(null);
-
-  const [trendingSeries, setTrendingSeries] = useState({});
-  const [trendingMovies, setTrendingMovies] = useState({});
-
-  const trendingSeriesURL =
-    'https://api.themoviedb.org/3/trending/tv/week?api_key=4f2917841238275498913fb9c85b266f&language=en-US&page=1';
-  const trendingMoviesURL =
-    'https://api.themoviedb.org/3/trending/movie/week?api_key=4f2917841238275498913fb9c85b266f&language=en-US&page=1';
-
-  useEffect(() => {
-    async function getTrendingSeries() {
-      const response = await fetch(trendingSeriesURL);
-      const json = await response.json();
-      setTrendingSeries(json);
-    }
-
-    async function getTrendingMovies() {
-      const response = await fetch(trendingMoviesURL);
-      const json = await response.json();
-      setTrendingMovies(json);
-    }
-
-    getTrendingSeries();
-    getTrendingMovies();
-  }, []);
-
-  const closeBottomSheet = () => {
-    bottomSheetRef.current?.close();
-  };
-
-  return (
-    <View style={styles.main}>
-      <View style={[styles.container, {height: 80}]}>
-        <Header />
-      </View>
-      <ScrollView style={styles.scrollView}>
-        <Text style={styles.subtitle}>Trending TV Shows</Text>
-        <ScrollView horizontal={true} style={styles.horizontalScrollView}>
-          {trendingSeries &&
-            trendingSeries.results &&
-            trendingSeries.results.map((item: any) => {
-              return (
-                <TouchableNativeFeedback
-                  key={item.id}
-                  onPress={() => {
-                    setSelectedItem(item);
-                    bottomSheetRef.current?.present();
-                  }}>
-                  <View key={item.id} style={styles.poster}>
-                    <Image
-                      style={styles.posterImage}
-                      source={{
-                        uri: `https://image.tmdb.org/t/p/w200${item.poster_path}`,
-                      }}
-                    />
-                  </View>
-                </TouchableNativeFeedback>
-              );
-            })}
-        </ScrollView>
-        <Separator />
-        <Text style={styles.subtitle}>Trending Movies</Text>
-        <ScrollView horizontal={true} style={styles.horizontalScrollView}>
-          {trendingMovies &&
-            trendingMovies.results &&
-            trendingMovies.results.map((item: any) => {
-              return (
-                <TouchableNativeFeedback
-                  key={item.id}
-                  onPress={() => {
-                    setSelectedItem(item);
-                    bottomSheetRef.current?.present();
-                  }}>
-                  <View key={item.id} style={styles.poster}>
-                    <Image
-                      style={styles.posterImage}
-                      source={{
-                        uri: `https://image.tmdb.org/t/p/w200${item.poster_path}`,
-                      }}
-                    />
-                  </View>
-                </TouchableNativeFeedback>
-              );
-            })}
-        </ScrollView>
-      </ScrollView>
-      <BottomSheetModal
-        index={0}
-        ref={bottomSheetRef}
-        snapPoints={['100%']}
-        enablePanDownToClose={true}
-        backgroundStyle={{backgroundColor: 'rgb(0,0,0)'}}>
-        {selectedItem && selectedItem.media_type === 'movie' && (
-          <MovieScreen
-            closeSheet={closeBottomSheet}
-            movieId={selectedItem.id}
-          />
-        )}
-        {selectedItem && selectedItem.media_type === 'tv' && (
-          <TVScreen closeSheet={closeBottomSheet} tvId={selectedItem.id} />
-        )}
-      </BottomSheetModal>
-    </View>
-  );
-};
-
 const AccountScreen = () => {
   return (
     <View style={styles.main}>
@@ -213,17 +94,6 @@ const AccountScreen = () => {
         <View style={{marginTop: 16}}></View>
         <Text style={styles.title}>Hey, Srinandan</Text>
       </View>
-    </View>
-  );
-};
-
-const Header = () => {
-  return (
-    <View style={styles.header}>
-      <Image
-        source={require('./assets/images/logo.png')}
-        style={styles.headerImage}
-      />
     </View>
   );
 };

@@ -3,7 +3,6 @@ import {
   Image,
   ImageBackground,
   Linking,
-  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -12,10 +11,12 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import {TouchableHighlight} from 'react-native-gesture-handler';
 import Icon from '../components/Icon';
 import Separator from '../components/Separator';
-import CustomButton from '../CustomButton';
+import CustomButton from '../components/CustomButton';
 
-import CustomText from '../CustomText';
+import CustomText from '../components/CustomText';
 import regions from '../regions.json';
+
+import LoadingIcon from '../assets/images/loading.svg';
 
 const TVScreen = ({tvId, closeSheet}) => {
   const {data, error, loading} = useTV(tvId);
@@ -134,8 +135,6 @@ const useTV = tvId => {
         setError(error);
         setLoading(false);
       });
-
-    console.log(data);
   }, [tvId]);
 
   return {data, error, loading};
@@ -143,7 +142,11 @@ const useTV = tvId => {
 
 // Path: Loading.tsx
 const Loading = () => {
-  return <CustomText>Loading...</CustomText>;
+  return (
+    <View style={{width: 56, height: 56}}>
+      <CustomText>Loading...</CustomText>
+    </View>
+  );
 };
 
 // Path: Error.tsx
