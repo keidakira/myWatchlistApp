@@ -29,7 +29,6 @@ const isFavorite = async id => {
   const db = new Database();
   let favorites = await db.get('favorites');
   favorites = JSON.parse(favorites) || {};
-  console.log(favorites);
 
   return favorites[id] || false;
 };
@@ -40,7 +39,6 @@ const addToHearts = async (id, poster) => {
   let favorites = await database.get('favorites');
 
   favorites = JSON.parse(favorites) || {};
-  console.log(id, poster);
 
   favorites[id] = {
     id: id,
@@ -100,7 +98,7 @@ const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
   const [currentMenu, setCurrentMenu] = useState(0);
   const [currentSeason, setCurrentSeason] = useState(1);
   const [showSeasonPicker, setShowSeasonPicker] = useState(false);
-  const [currCountry, setCurrCountry] = useState('United States');
+  const [currCountry, setCurrCountry] = useState({});
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [episodes, setEpisodes] = useState(eps);
   const [sort, setSort] = useState(0);
@@ -115,7 +113,26 @@ const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
       setEpisodes(data.episodes);
     };
 
+    const getStreamingForCountry = async () => {
+      let streamingCountries = [];
+      for (let country in countries) {
+        streamingCountries.push({
+          id: country,
+          ...countries[country],
+          name: regions.filter(r => r.alpha2 === country)[0].name.split(',')[0],
+        });
+      }
+
+      streamingCountries.push({
+        id: 'all',
+        name: '',
+      });
+
+      setCurrCountry(streamingCountries.filter(c => c.id === 'US')[0]);
+    };
+
     getEpisodes();
+    getStreamingForCountry();
   }, [currentSeason, tv.id]);
 
   return (
@@ -278,7 +295,9 @@ const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
                 setShowCountryPicker(true);
               }}>
               <View style={styles.seasonButton}>
-                <CustomText style={{color: 'white'}}>{currCountry}</CustomText>
+                <CustomText style={{color: 'white'}}>
+                  {currCountry.name}
+                </CustomText>
                 <Icon
                   name="chevron-down"
                   size={12}
@@ -287,6 +306,52 @@ const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
                 />
               </View>
             </TouchableOpacity>
+            <View>
+              {currCountry.flatrate && (
+                <View>
+                  <CustomText style={styles.streamTitle}>
+                    Subscription
+                  </CustomText>
+                  <ScrollView horizontal={true}>
+                    {currCountry.flatrate &&
+                      currCountry.flatrate.map(stream => {
+                        return (
+                          <Image
+                            key={stream.provider_id}
+                            source={{
+                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                            }}
+                            style={styles.streamImage}
+                          />
+                        );
+                      })}
+                  </ScrollView>
+                  <Separator />
+                </View>
+              )}
+              {currCountry.buy && (
+                <View>
+                  <CustomText style={styles.streamTitle}>
+                    Buy or Rent
+                  </CustomText>
+                  <ScrollView horizontal={true}>
+                    {currCountry.buy &&
+                      currCountry.buy.map(stream => {
+                        return (
+                          <Image
+                            key={stream.provider_id}
+                            source={{
+                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                            }}
+                            style={styles.streamImage}
+                          />
+                        );
+                      })}
+                  </ScrollView>
+                  <Separator />
+                </View>
+              )}
+            </View>
           </View>
         )}
 
@@ -346,27 +411,6 @@ const CountryPicker = ({
   setCountry,
   setPicker,
 }) => {
-  /**
-   * regions: [{"alpha2": "ZW", "alpha3": "ZWE", "countryCallingCodes": ["+263"], "currencies": ["USD", "ZAR", "BWP", "GBP", "EUR"], "emoji": "🇿🇼", "ioc": "ZIM", "languages": ["eng", "sna", "nde"], "name": "Zimbabwe", "status": "assigned"}]
-   * streamingCountries: 
-   * "US": {
-      "link": "https://www.themoviedb.org/tv/90669-1899/watch?locale=US",
-      "flatrate": [
-        {
-          "logo_path": "/t2yyOv40HZeVlLjYsCsPHnWLk4W.jpg",
-          "provider_id": 8,
-          "provider_name": "Netflix",
-          "display_priority": 0
-        },
-        {
-          "logo_path": "/mShqQVDhHoK7VUbfYG3Un6xE8Mv.jpg",
-          "provider_id": 1796,
-          "provider_name": "Netflix basic with Ads",
-          "display_priority": 219
-        }
-      ]
-    },
-   */
   let countries = [];
   for (let country in streamingCountries) {
     countries.push({
@@ -399,11 +443,11 @@ const CountryPicker = ({
                 key={index}
                 style={styles.season}
                 onPress={() => {
-                  setActiveCountry(item.name);
+                  setActiveCountry(item);
                 }}>
                 <CustomText
                   style={
-                    item.name === activeCountry
+                    item.id === activeCountry.id
                       ? styles.seasonPickerTextActive
                       : styles.seasonPickerText
                   }>
@@ -507,7 +551,7 @@ const useTV = tvId => {
       });
 
     fetch(
-      `https://api.themoviedb.org/3/tv/90669/watch/providers?api_key=${Config.API_KEY}`,
+      `https://api.themoviedb.org/3/tv/${tvId}/watch/providers?api_key=${Config.API_KEY}`,
     )
       .then(response => response.json())
       .then(data => {
@@ -674,6 +718,17 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 32,
     zIndex: 9999,
+  },
+  streamImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  streamTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    paddingVertical: 8,
   },
 });
 
