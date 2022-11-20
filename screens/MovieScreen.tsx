@@ -1,8 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
+  Image,
   ImageBackground,
   Linking,
+  Pressable,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -11,6 +14,7 @@ import {
 import Separator from '../components/Separator';
 import CustomButton from '../components/CustomButton';
 import Icon from '../components/Icon';
+import regions from '../regions.json';
 
 import CustomText from '../components/CustomText';
 import Database from '../utils/Database';
@@ -22,7 +26,6 @@ const isFavorite = async id => {
   const db = new Database();
   let favorites = await db.get('favorites');
   favorites = JSON.parse(favorites) || {};
-  console.log(favorites);
 
   return favorites[id] || false;
 };
@@ -33,7 +36,6 @@ const addToHearts = async (id, poster) => {
   let favorites = await database.get('favorites');
 
   favorites = JSON.parse(favorites) || {};
-  console.log(id, poster);
 
   favorites[id] = {
     id: id,
@@ -54,7 +56,7 @@ const removeFromHearts = async id => {
 };
 
 const MovieScreen = ({movieId, closeSheet}) => {
-  const {data, error, loading, isHearted} = useMovie(movieId);
+  const {data, error, loading, isHearted, countries} = useMovie(movieId);
 
   if (loading) {
     return <Loading />;
@@ -64,11 +66,18 @@ const MovieScreen = ({movieId, closeSheet}) => {
     return <Error />;
   }
 
-  return <Movie movie={data} close={closeSheet} isHearted={isHearted} />;
+  return (
+    <Movie
+      movie={data}
+      close={closeSheet}
+      isHearted={isHearted}
+      countries={countries}
+    />
+  );
 };
 
 // Path: Movie.tsx
-const Movie = ({movie, close, isHearted}) => {
+const Movie = ({movie, close, isHearted, countries}) => {
   const movieClip = movie.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -83,6 +92,31 @@ const Movie = ({movie, close, isHearted}) => {
   const [viewOverview, setViewOverview] = useState(false);
   const [isFavorite, setIsFavorite] = useState(isHearted);
   const [currentMenu, setCurrentMenu] = useState(0);
+  const [currCountry, setCurrCountry] = useState({});
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
+
+  // Get countries when country is changed
+  useEffect(() => {
+    const getStreamingForCountry = async () => {
+      let streamingCountries = [];
+      for (let country in countries) {
+        streamingCountries.push({
+          id: country,
+          ...countries[country],
+          name: regions.filter(r => r.alpha2 === country)[0].name.split(',')[0],
+        });
+      }
+
+      streamingCountries.push({
+        id: 'all',
+        name: '',
+      });
+
+      setCurrCountry(streamingCountries.filter(c => c.id === 'US')[0]);
+    };
+
+    getStreamingForCountry();
+  }, [countries]);
 
   return (
     <View style={styles.container}>
@@ -169,8 +203,98 @@ const Movie = ({movie, close, isHearted}) => {
             <CustomText>Cast</CustomText>
           </TouchableOpacity>
         </View>
+        {/** Stream options */}
+        {currentMenu === 0 && (
+          <View style={{marginVertical: 24}}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowCountryPicker(true);
+              }}>
+              <View style={styles.seasonButton}>
+                <CustomText style={{color: 'white'}}>
+                  {currCountry?.name || 'Select a country'}
+                </CustomText>
+                <Icon
+                  name="chevron-down"
+                  size={12}
+                  color="white"
+                  style={{marginLeft: 8}}
+                />
+              </View>
+            </TouchableOpacity>
+            <View>
+              {currCountry && currCountry.flatrate && (
+                <View>
+                  <CustomText style={styles.streamTitle}>
+                    Subscription
+                  </CustomText>
+                  <ScrollView horizontal={true}>
+                    {currCountry.flatrate &&
+                      currCountry.flatrate.map(stream => {
+                        return (
+                          <Image
+                            key={stream.provider_id}
+                            source={{
+                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                            }}
+                            style={styles.streamImage}
+                          />
+                        );
+                      })}
+                  </ScrollView>
+                  <Separator />
+                </View>
+              )}
+              {currCountry && (currCountry.buy || currCountry.rent) && (
+                <View>
+                  <CustomText style={styles.streamTitle}>
+                    Buy or Rent
+                  </CustomText>
+                  <ScrollView horizontal={true}>
+                    {currCountry.buy &&
+                      currCountry.buy.map(stream => {
+                        return (
+                          <Image
+                            key={stream.provider_id}
+                            source={{
+                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                            }}
+                            style={styles.streamImage}
+                          />
+                        );
+                      })}
+                    {currCountry.buy === undefined &&
+                      currCountry.rent &&
+                      currCountry.rent.map(stream => {
+                        return (
+                          <Image
+                            key={stream.provider_id}
+                            source={{
+                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                            }}
+                            style={styles.streamImage}
+                          />
+                        );
+                      })}
+                  </ScrollView>
+                  <Separator />
+                </View>
+              )}
+            </View>
+          </View>
+        )}
+
         <Separator />
       </ScrollView>
+      {/** Country Picker */}
+      {currentMenu === 0 && showCountryPicker && (
+        <CountryPicker
+          streamingCountries={countries}
+          currCountry={currCountry}
+          setCountry={setCurrCountry}
+          setPicker={setShowCountryPicker}
+        />
+      )}
     </View>
   );
 };
@@ -180,6 +304,7 @@ const useMovie = movieId => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isHearted, setIsHearted] = useState(false);
+  const [countries, setCountries] = useState({});
 
   useEffect(() => {
     setLoading(true);
@@ -194,6 +319,18 @@ const useMovie = movieId => {
         setLoading(false);
       });
 
+    fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${Config.API_KEY}`,
+    )
+      .then(response => response.json())
+      .then(data => {
+        setCountries(data.results);
+      })
+      .catch(error => {
+        setError(error);
+        setLoading(false);
+      });
+
     isFavorite(movieId)
       .then(favorite => setIsHearted(favorite))
       .catch(err => {
@@ -201,7 +338,7 @@ const useMovie = movieId => {
       });
   }, [movieId]);
 
-  return {data, error, loading, isHearted};
+  return {data, error, loading, isHearted, countries};
 };
 
 // Path: Loading.tsx
@@ -216,6 +353,72 @@ const Loading = () => {
 // Path: Error.tsx
 const Error = () => {
   return <Text style={{color: 'black'}}>Error...</Text>;
+};
+
+// CountryPicker.tsx
+const CountryPicker = ({
+  streamingCountries,
+  currCountry,
+  setCountry,
+  setPicker,
+}) => {
+  let countries = [];
+  for (let country in streamingCountries) {
+    countries.push({
+      id: country,
+      ...streamingCountries[country],
+      name: regions.filter(r => r.alpha2 === country)[0].name.split(',')[0],
+    });
+  }
+
+  countries.push({
+    id: 'all',
+    name: '',
+  });
+
+  const [activeCountry, setActiveCountry] = useState(currCountry || 'all');
+
+  return (
+    <>
+      <View style={styles.seasonPicker}>
+        <FlatList
+          data={countries}
+          keyExtractor={item => item.id}
+          style={{marginBottom: 80, paddingTop: 40}}
+          contentContainerStyle={{
+            justifyContent: 'center',
+          }}
+          renderItem={({item, index}) => {
+            return (
+              <Pressable
+                key={index}
+                style={styles.season}
+                onPress={() => {
+                  setActiveCountry(item);
+                }}>
+                <CustomText
+                  style={
+                    item.id === activeCountry.id
+                      ? styles.seasonPickerTextActive
+                      : styles.seasonPickerText
+                  }>
+                  {item.name}
+                </CustomText>
+              </Pressable>
+            );
+          }}
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.closePickerIcon}
+        onPress={() => {
+          setPicker(false);
+          setCountry(activeCountry);
+        }}>
+        <Icon name="close" size={24} color="black" />
+      </TouchableOpacity>
+    </>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -288,6 +491,63 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flex: 1 / 3,
+  },
+  seasonButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    padding: 16,
+  },
+  seasonPicker: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.75)',
+    padding: 16,
+    zIndex: 9999,
+  },
+  season: {
+    padding: 16,
+  },
+  seasonPickerText: {
+    fontSize: 24,
+    color: 'gray',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  seasonPickerTextActive: {
+    fontSize: 28,
+    color: 'white',
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  closePickerIcon: {
+    position: 'absolute',
+    bottom: 32,
+    left: '50%',
+    transform: [{translateX: -30}],
+    backgroundColor: 'rgba(255, 255, 255, 0.75)',
+    padding: 16,
+    borderRadius: 32,
+    zIndex: 9999,
+  },
+  streamImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    marginRight: 16,
+  },
+  streamTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    paddingVertical: 8,
   },
 });
 
