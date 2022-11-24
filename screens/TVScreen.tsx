@@ -58,9 +58,53 @@ const removeFromHearts = async id => {
   database.set('favorites', JSON.stringify(favorites));
 };
 
+const isInWatchlist = async id => {
+  const db = new Database();
+  let watchlist = await db.get('watchlist');
+  watchlist = JSON.parse(watchlist) || {};
+
+  console.log('Watchlist: ', watchlist);
+
+  return watchlist[id] !== undefined;
+};
+
+const addToWatchlist = async (id, poster) => {
+  // Add to watchlist
+  const database = new Database();
+  let watchlist = await database.get('watchlist');
+
+  watchlist = JSON.parse(watchlist) || {};
+
+  watchlist[id] = {
+    id: id,
+    poster: poster,
+    media_type: 'tv',
+  };
+
+  const response = await database.set('watchlist', JSON.stringify(watchlist));
+};
+
+const removeFromWatchlist = async id => {
+  // Remove from watchlist
+  const database = new Database();
+  let watchlist = await database.get('watchlist');
+
+  watchlist = JSON.parse(watchlist);
+  delete watchlist[id];
+  database.set('watchlist', JSON.stringify(watchlist));
+};
+
 const TVScreen = ({tvId, closeSheet}) => {
-  const {data, error, loading, isHearted, episodes, countries, cast} =
-    useTV(tvId);
+  const {
+    data,
+    error,
+    loading,
+    isHearted,
+    inWatchlist,
+    episodes,
+    countries,
+    cast,
+  } = useTV(tvId);
 
   if (loading) {
     return <Loading />;
@@ -75,6 +119,7 @@ const TVScreen = ({tvId, closeSheet}) => {
       tv={data}
       close={closeSheet}
       isHearted={isHearted}
+      inWatchlist={inWatchlist}
       episodes={episodes}
       countries={countries}
       cast={cast}
@@ -83,7 +128,15 @@ const TVScreen = ({tvId, closeSheet}) => {
 };
 
 // Path: TV.tsx
-const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
+const TV = ({
+  tv,
+  close,
+  isHearted,
+  inWatchlist,
+  episodes: eps,
+  countries,
+  cast,
+}) => {
   const tvClip = tv.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -97,7 +150,7 @@ const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
   // States
   const [viewOverview, setViewOverview] = useState(false);
   const [isFavorite, setIsFavorite] = useState(isHearted);
-  const [inList, setInList] = useState(false);
+  const [inList, setInList] = useState(inWatchlist);
   const [currentMenu, setCurrentMenu] = useState(0);
   const [currentSeason, setCurrentSeason] = useState(1);
   const [showSeasonPicker, setShowSeasonPicker] = useState(false);
@@ -165,7 +218,15 @@ const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <Pressable onPress={() => setInList(!inList)}>
+          <Pressable
+            onPress={() => {
+              if (inList) {
+                removeFromWatchlist(tv.id);
+              } else {
+                addToWatchlist(tv.id, tv.poster_path);
+              }
+              setInList(!inList);
+            }}>
             <View style={styles.favoriteIcon}>
               <Icon
                 name={!inList ? 'plus' : 'check'}
@@ -560,6 +621,7 @@ const useTV = tvId => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isHearted, setIsHearted] = useState(false);
+  const [inWatchlist, setInWatchlist] = useState(false);
   const [episodes, setEpisodes] = useState(null);
   const [countries, setCountries] = useState({});
   const [cast, setCast] = useState(null);
@@ -607,9 +669,24 @@ const useTV = tvId => {
       .catch(err => {
         console.log(err);
       });
+
+    isInWatchlist(tvId)
+      .then(watchlist => setInWatchlist(watchlist))
+      .catch(err => {
+        console.log(err);
+      });
   }, [tvId]);
 
-  return {data, error, loading, isHearted, episodes, countries, cast};
+  return {
+    data,
+    error,
+    loading,
+    isHearted,
+    inWatchlist,
+    episodes,
+    countries,
+    cast,
+  };
 };
 
 // Path: Loading.tsx

@@ -55,8 +55,45 @@ const removeFromHearts = async id => {
   database.set('favorites', JSON.stringify(favorites));
 };
 
+const isInWatchlist = async id => {
+  const db = new Database();
+  let watchlist = await db.get('watchlist');
+  watchlist = JSON.parse(watchlist) || {};
+
+  console.log('Watchlist: ', watchlist);
+
+  return watchlist[id] !== undefined;
+};
+
+const addToWatchlist = async (id, poster) => {
+  // Add to watchlist
+  const database = new Database();
+  let watchlist = await database.get('watchlist');
+
+  watchlist = JSON.parse(watchlist) || {};
+
+  watchlist[id] = {
+    id: id,
+    poster: poster,
+    media_type: 'tv',
+  };
+
+  const response = await database.set('watchlist', JSON.stringify(watchlist));
+};
+
+const removeFromWatchlist = async id => {
+  // Remove from watchlist
+  const database = new Database();
+  let watchlist = await database.get('watchlist');
+
+  watchlist = JSON.parse(watchlist);
+  delete watchlist[id];
+  database.set('watchlist', JSON.stringify(watchlist));
+};
+
 const MovieScreen = ({movieId, closeSheet}) => {
-  const {data, error, loading, isHearted, countries, cast} = useMovie(movieId);
+  const {data, error, loading, isHearted, inWatchlist, countries, cast} =
+    useMovie(movieId);
 
   if (loading) {
     return <Loading />;
@@ -71,6 +108,7 @@ const MovieScreen = ({movieId, closeSheet}) => {
       movie={data}
       close={closeSheet}
       isHearted={isHearted}
+      inWatchlist={inWatchlist}
       countries={countries}
       cast={cast}
     />
@@ -78,7 +116,7 @@ const MovieScreen = ({movieId, closeSheet}) => {
 };
 
 // Path: Movie.tsx
-const Movie = ({movie, close, isHearted, countries, cast}) => {
+const Movie = ({movie, close, isHearted, inWatchlist, countries, cast}) => {
   const movieClip = movie.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -92,7 +130,7 @@ const Movie = ({movie, close, isHearted, countries, cast}) => {
   // States
   const [viewOverview, setViewOverview] = useState(false);
   const [isFavorite, setIsFavorite] = useState(isHearted);
-  const [inList, setInList] = useState(false);
+  const [inList, setInList] = useState(inWatchlist);
   const [currentMenu, setCurrentMenu] = useState(0);
   const [currCountry, setCurrCountry] = useState({});
   const [showCountryPicker, setShowCountryPicker] = useState(false);
@@ -147,7 +185,16 @@ const Movie = ({movie, close, isHearted, countries, cast}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <Pressable onPress={() => setInList(!inList)}>
+          <Pressable
+            onPress={() => {
+              if (inList) {
+                removeFromWatchlist(movie.id);
+              } else {
+                addToWatchlist(movie.id, movie.poster_path);
+              }
+
+              setInList(!inList);
+            }}>
             <View style={styles.favoriteIcon}>
               <Icon
                 name={!inList ? 'plus' : 'check'}
@@ -340,6 +387,7 @@ const useMovie = movieId => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isHearted, setIsHearted] = useState(false);
+  const [inWatchlist, setInWatchlist] = useState(false);
   const [countries, setCountries] = useState({});
   const [cast, setCast] = useState([]);
 
@@ -374,9 +422,15 @@ const useMovie = movieId => {
       .catch(err => {
         console.log(err);
       });
+
+    isInWatchlist(movieId)
+      .then(watchlist => setInWatchlist(watchlist))
+      .catch(err => {
+        console.log(err);
+      });
   }, [movieId]);
 
-  return {data, error, loading, isHearted, countries, cast};
+  return {data, error, loading, isHearted, inWatchlist, countries, cast};
 };
 
 // Path: Loading.tsx
