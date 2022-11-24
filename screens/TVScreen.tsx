@@ -111,6 +111,7 @@ const TVScreen = ({tvId, closeSheet}) => {
   }
 
   if (error) {
+    console.log('Error: ', error);
     return <Error />;
   }
 

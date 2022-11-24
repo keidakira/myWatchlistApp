@@ -75,7 +75,7 @@ const addToWatchlist = async (id, poster) => {
   watchlist[id] = {
     id: id,
     poster: poster,
-    media_type: 'tv',
+    media_type: 'movie',
   };
 
   const response = await database.set('watchlist', JSON.stringify(watchlist));
@@ -100,6 +100,7 @@ const MovieScreen = ({movieId, closeSheet}) => {
   }
 
   if (error) {
+    console.log('Error: ', error);
     return <Error />;
   }
 
