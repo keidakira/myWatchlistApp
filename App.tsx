@@ -40,7 +40,6 @@ const App = () => {
                     color={color}
                   />
                 ),
-                unmountOnBlur: true,
               }}
             />
             <Tab.Screen
@@ -70,7 +69,6 @@ const App = () => {
                     color={color}
                   />
                 ),
-                unmountOnBlur: true,
               }}
             />
           </Tab.Navigator>
