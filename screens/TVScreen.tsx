@@ -63,8 +63,6 @@ const isInWatchlist = async id => {
   let watchlist = await db.get('watchlist');
   watchlist = JSON.parse(watchlist) || {};
 
-  console.log('Watchlist: ', watchlist);
-
   return watchlist[id] !== undefined;
 };
 
