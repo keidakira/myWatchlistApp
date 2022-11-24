@@ -59,7 +59,8 @@ const removeFromHearts = async id => {
 };
 
 const TVScreen = ({tvId, closeSheet}) => {
-  const {data, error, loading, isHearted, episodes, countries} = useTV(tvId);
+  const {data, error, loading, isHearted, episodes, countries, cast} =
+    useTV(tvId);
 
   if (loading) {
     return <Loading />;
@@ -76,12 +77,13 @@ const TVScreen = ({tvId, closeSheet}) => {
       isHearted={isHearted}
       episodes={episodes}
       countries={countries}
+      cast={cast}
     />
   );
 };
 
 // Path: TV.tsx
-const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
+const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
   const tvClip = tv.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -355,6 +357,30 @@ const TV = ({tv, close, isHearted, episodes: eps, countries}) => {
           </View>
         )}
 
+        {/** Cast */}
+        {currentMenu === 1 && (
+          <View style={styles.castContainer}>
+            {cast.map(
+              c =>
+                c.profile_path && (
+                  <ImageBackground
+                    key={c.id}
+                    source={{
+                      uri: `https://image.tmdb.org/t/p/w500${c.profile_path}`,
+                    }}
+                    style={styles.castImage}
+                    imageStyle={{borderRadius: 8}}>
+                    <View style={styles.castOverlay}>
+                      <CustomText style={styles.castName}>
+                        {c.character}
+                      </CustomText>
+                    </View>
+                  </ImageBackground>
+                ),
+            )}
+          </View>
+        )}
+
         <Separator />
       </ScrollView>
       {/** Season Picker */}
@@ -524,6 +550,7 @@ const useTV = tvId => {
   const [isHearted, setIsHearted] = useState(false);
   const [episodes, setEpisodes] = useState(null);
   const [countries, setCountries] = useState({});
+  const [cast, setCast] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -531,6 +558,7 @@ const useTV = tvId => {
       .then(response => response.json())
       .then(data => {
         setData(data);
+        setCast(data.credits.cast);
         setLoading(false);
       })
       .catch(error => {
@@ -569,7 +597,7 @@ const useTV = tvId => {
       });
   }, [tvId]);
 
-  return {data, error, loading, isHearted, episodes, countries};
+  return {data, error, loading, isHearted, episodes, countries, cast};
 };
 
 // Path: Loading.tsx
@@ -729,6 +757,34 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     paddingVertical: 8,
+  },
+  castContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+  },
+  castImage: {
+    width: 160,
+    height: 240,
+    marginVertical: 8,
+  },
+  castName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingBottom: 16,
+  },
+  castOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
 });
 
