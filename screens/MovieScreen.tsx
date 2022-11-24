@@ -56,7 +56,7 @@ const removeFromHearts = async id => {
 };
 
 const MovieScreen = ({movieId, closeSheet}) => {
-  const {data, error, loading, isHearted, countries} = useMovie(movieId);
+  const {data, error, loading, isHearted, countries, cast} = useMovie(movieId);
 
   if (loading) {
     return <Loading />;
@@ -72,12 +72,13 @@ const MovieScreen = ({movieId, closeSheet}) => {
       close={closeSheet}
       isHearted={isHearted}
       countries={countries}
+      cast={cast}
     />
   );
 };
 
 // Path: Movie.tsx
-const Movie = ({movie, close, isHearted, countries}) => {
+const Movie = ({movie, close, isHearted, countries, cast}) => {
   const movieClip = movie.videos.results.filter(
     v => v.type === 'Trailer' || v.type === 'Teaser',
   )[0]?.key;
@@ -284,6 +285,30 @@ const Movie = ({movie, close, isHearted, countries}) => {
           </View>
         )}
 
+        {/** Cast */}
+        {currentMenu === 1 && (
+          <View style={styles.castContainer}>
+            {cast.map(
+              c =>
+                c.profile_path && (
+                  <ImageBackground
+                    key={c.id}
+                    source={{
+                      uri: `https://image.tmdb.org/t/p/w500${c.profile_path}`,
+                    }}
+                    style={styles.castImage}
+                    imageStyle={{borderRadius: 8}}>
+                    <View style={styles.castOverlay}>
+                      <CustomText style={styles.castName}>
+                        {c.character}
+                      </CustomText>
+                    </View>
+                  </ImageBackground>
+                ),
+            )}
+          </View>
+        )}
+
         <Separator />
       </ScrollView>
       {/** Country Picker */}
@@ -305,6 +330,7 @@ const useMovie = movieId => {
   const [loading, setLoading] = useState(true);
   const [isHearted, setIsHearted] = useState(false);
   const [countries, setCountries] = useState({});
+  const [cast, setCast] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -313,6 +339,7 @@ const useMovie = movieId => {
       .then(data => {
         setData(data);
         setLoading(false);
+        setCast(data.credits.cast);
       })
       .catch(error => {
         setError(error);
@@ -338,7 +365,7 @@ const useMovie = movieId => {
       });
   }, [movieId]);
 
-  return {data, error, loading, isHearted, countries};
+  return {data, error, loading, isHearted, countries, cast};
 };
 
 // Path: Loading.tsx
@@ -548,6 +575,34 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     paddingVertical: 8,
+  },
+  castContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+  },
+  castImage: {
+    width: 160,
+    height: 240,
+    marginVertical: 8,
+  },
+  castName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingBottom: 16,
+  },
+  castOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
 });
 
