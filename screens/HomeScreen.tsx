@@ -11,7 +11,7 @@ import {
 import Separator from '../components/Separator';
 import MovieScreen from './MovieScreen';
 import TVScreen from './TVScreen';
-import Config from 'react-native-config';
+import Config from '../config';
 
 const Header = () => {
   return (

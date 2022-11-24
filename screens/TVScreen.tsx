@@ -23,7 +23,7 @@ import regions from '../regions.json';
 import Database from '../utils/Database';
 import {TouchableOpacity} from '@gorhom/bottom-sheet';
 import FAB from '../components/FAB';
-import Config from 'react-native-config';
+import Config from '../config';
 
 const isFavorite = async id => {
   const db = new Database();

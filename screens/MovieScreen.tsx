@@ -19,7 +19,7 @@ import regions from '../regions.json';
 import CustomText from '../components/CustomText';
 import Database from '../utils/Database';
 import {TouchableOpacity} from '@gorhom/bottom-sheet';
-import Config from 'react-native-config';
+import Config from '../config';
 import {ScrollView} from 'react-native-gesture-handler';
 
 const isFavorite = async id => {
