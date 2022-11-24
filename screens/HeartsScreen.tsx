@@ -39,8 +39,6 @@ const HeartsScreen = () => {
     }, 1000);
   };
 
-  console.log(selectedItem);
-
   return (
     <View style={styles.main}>
       <View style={styles.container}>
