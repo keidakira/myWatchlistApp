@@ -9,6 +9,7 @@ import {
   TouchableNativeFeedback,
   ActivityIndicator,
 } from 'react-native';
+import CustomText from '../components/CustomText';
 import Separator from '../components/Separator';
 import MovieScreen from './MovieScreen';
 import TVScreen from './TVScreen';
@@ -20,13 +21,16 @@ const SearchScreen = () => {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     async function getSearchResults() {
       setSearchResults([]);
+      setIsLoading(true);
       const response = await fetch(searchEndpoint + searchText);
       const json = await response.json();
       setSearchResults(json.results.filter((item: any) => item.poster_path));
+      setIsLoading(false);
     }
 
     const delayFn = setTimeout(() => {
@@ -34,6 +38,7 @@ const SearchScreen = () => {
       if (searchText.length > 3) {
         getSearchResults();
       } else {
+        setIsLoading(true);
         setSearchResults([]);
       }
     }, 1000);
@@ -86,11 +91,17 @@ const SearchScreen = () => {
             ItemSeparatorComponent={() => <Separator />}
           />
         ) : (
-          searchText !== '' && (
+          searchText !== '' &&
+          isLoading && (
             <View style={{marginTop: 32}}>
               <ActivityIndicator size="large" color="red" />
             </View>
           )
+        )}
+        {searchText !== '' && !isLoading && searchResults.length === 0 && (
+          <View>
+            <CustomText style={{color: 'white'}}>No results found</CustomText>
+          </View>
         )}
       </View>
       <BottomSheetModal
