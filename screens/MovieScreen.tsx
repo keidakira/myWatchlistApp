@@ -92,6 +92,7 @@ const Movie = ({movie, close, isHearted, countries, cast}) => {
   // States
   const [viewOverview, setViewOverview] = useState(false);
   const [isFavorite, setIsFavorite] = useState(isHearted);
+  const [inList, setInList] = useState(false);
   const [currentMenu, setCurrentMenu] = useState(0);
   const [currCountry, setCurrCountry] = useState({});
   const [showCountryPicker, setShowCountryPicker] = useState(false);
@@ -146,7 +147,17 @@ const Movie = ({movie, close, isHearted, countries, cast}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <TouchableOpacity
+          <Pressable onPress={() => setInList(!inList)}>
+            <View style={styles.favoriteIcon}>
+              <Icon
+                name={!inList ? 'plus' : 'check'}
+                size={32}
+                color="white"
+                material={true}
+              />
+            </View>
+          </Pressable>
+          <Pressable
             onPress={() => {
               if (isFavorite) {
                 removeFromHearts(movie.id);
@@ -163,7 +174,7 @@ const Movie = ({movie, close, isHearted, countries, cast}) => {
                 color="white"
               />
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <TouchableHighlight
           onPress={() => {

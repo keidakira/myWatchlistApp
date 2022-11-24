@@ -5,6 +5,7 @@ import Icon from '../components/Icon';
 import Separator from '../components/Separator';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HeartsScreen from './HeartsScreen';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 
 // Use stack navigation to go to a new HeartsScreen.tsx
 
@@ -32,22 +33,22 @@ const Account = ({navigation}) => {
           <Text style={styles.title}>Hey, Srinandan</Text>
         </View>
         <View style={styles.list}>
-          <Pressable
+          <TouchableOpacity
             onPress={() => {
               navigation.navigate('Hearts');
             }}>
             <View style={styles.listItem}>
-              <Icon name="ios-heart-outline" size={24} color="white" />
+              <Icon name="heart" size={24} color="white" material />
               <CustomText style={styles.listItemText}>Favorites</CustomText>
             </View>
-          </Pressable>
+          </TouchableOpacity>
           <Separator />
-          <Pressable>
+          <TouchableOpacity>
             <View style={styles.listItem}>
-              <Icon name="ios-settings-outline" size={24} color="white" />
-              <CustomText style={styles.listItemText}>Settings</CustomText>
+              <Icon name="play-box-multiple" size={24} color="white" material />
+              <CustomText style={styles.listItemText}>Watchlist</CustomText>
             </View>
-          </Pressable>
+          </TouchableOpacity>
         </View>
       </View>
     </View>

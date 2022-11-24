@@ -97,6 +97,7 @@ const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
   // States
   const [viewOverview, setViewOverview] = useState(false);
   const [isFavorite, setIsFavorite] = useState(isHearted);
+  const [inList, setInList] = useState(false);
   const [currentMenu, setCurrentMenu] = useState(0);
   const [currentSeason, setCurrentSeason] = useState(1);
   const [showSeasonPicker, setShowSeasonPicker] = useState(false);
@@ -164,7 +165,17 @@ const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
             onPress={openTrailer}
             style={{flex: 7.5 / 8}}
           />
-          <TouchableOpacity
+          <Pressable onPress={() => setInList(!inList)}>
+            <View style={styles.favoriteIcon}>
+              <Icon
+                name={!inList ? 'plus' : 'check'}
+                size={32}
+                color="white"
+                material={true}
+              />
+            </View>
+          </Pressable>
+          <Pressable
             onPress={() => {
               if (isFavorite) {
                 removeFromHearts(tv.id);
@@ -179,9 +190,10 @@ const TV = ({tv, close, isHearted, episodes: eps, countries, cast}) => {
                 name={isFavorite ? 'heart' : 'heart-outline'}
                 size={32}
                 color="white"
+                material={true}
               />
             </View>
-          </TouchableOpacity>
+          </Pressable>
         </View>
         <TouchableHighlight
           onPress={() => {
