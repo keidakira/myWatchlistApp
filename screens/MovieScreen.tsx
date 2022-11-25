@@ -405,7 +405,7 @@ const useMovie = movieId => {
       });
 
     fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/watch/providers?api_key=${Config.API_KEY}`,
+      `${Config.TMDB_URL}/movie/${movieId}/watch/providers?api_key=${Config.API_KEY}`,
     )
       .then(response => response.json())
       .then(data => {
