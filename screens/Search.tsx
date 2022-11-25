@@ -16,7 +16,7 @@ import MovieScreen from './MovieScreen';
 import TVScreen from './TVScreen';
 
 const SearchScreen = () => {
-  const searchEndpoint = 'https://fancy-pants-calf.cyclic.app/search?query=';
+  const searchEndpoint = `${Config.SERVER_URL}/search?query=`;
 
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);

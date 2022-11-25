@@ -627,7 +627,7 @@ const useTV = tvId => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`https://fancy-pants-calf.cyclic.app/tv/${tvId}`)
+    fetch(`${Config.SERVER_URL}/tv/${tvId}`)
       .then(response => response.json())
       .then(data => {
         setData(data);
