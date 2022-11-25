@@ -32,14 +32,8 @@ const HomeScreen = () => {
   const [trendingSeries, setTrendingSeries] = useState({});
   const [trendingMovies, setTrendingMovies] = useState({});
 
-  const trendingSeriesURL =
-    'https://api.themoviedb.org/3/trending/tv/week?api_key=' +
-    Config.API_KEY +
-    '&language=en-US&page=1';
-  const trendingMoviesURL =
-    'https://api.themoviedb.org/3/trending/movie/week?api_key=' +
-    Config.API_KEY +
-    '&language=en-US&page=1';
+  const trendingSeriesURL = `${Config.TMDB_URL}/trending/tv/week?api_key=${Config.API_KEY}&page=1`;
+  const trendingMoviesURL = `${Config.TMDB_URL}/trending/movie/week?api_key=${Config.API_KEY}&page=1`;
 
   useEffect(() => {
     async function getTrendingSeries() {

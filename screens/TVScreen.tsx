@@ -162,7 +162,7 @@ const TV = ({
   useEffect(() => {
     const getEpisodes = async () => {
       const response = await fetch(
-        `https://api.themoviedb.org/3/tv/${tv.id}/season/${currentSeason}?api_key=${Config.API_KEY}`,
+        `${Config.TMDB_URL}/tv/${tv.id}/season/${currentSeason}?api_key=${Config.API_KEY}`,
       );
       const data = await response.json();
       setEpisodes(data.episodes);
@@ -639,9 +639,7 @@ const useTV = tvId => {
         setLoading(false);
       });
 
-    fetch(
-      `https://api.themoviedb.org/3/tv/${tvId}/season/1?api_key=${Config.API_KEY}`,
-    )
+    fetch(`${Config.TMDB_URL}/tv/${tvId}/season/1?api_key=${Config.API_KEY}`)
       .then(response => response.json())
       .then(data => {
         setEpisodes(data.episodes);
@@ -652,7 +650,7 @@ const useTV = tvId => {
       });
 
     fetch(
-      `https://api.themoviedb.org/3/tv/${tvId}/watch/providers?api_key=${Config.API_KEY}`,
+      `${Config.TMDB_URL}/tv/${tvId}/watch/providers?api_key=${Config.API_KEY}`,
     )
       .then(response => response.json())
       .then(data => {
