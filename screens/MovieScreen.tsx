@@ -162,7 +162,7 @@ const Movie = ({movie, close, isHearted, inWatchlist, countries, cast}) => {
       <ImageBackground
         style={{width: '100%', height: 256}}
         source={{
-          uri: `https://image.tmdb.org/t/p/w500${movie.backdrop_path}`,
+          uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${movie.backdrop_path}`,
         }}>
         <View style={styles.imageBackdrop} />
         <Text style={styles.movieTitle} numberOfLines={2}>
@@ -293,7 +293,7 @@ const Movie = ({movie, close, isHearted, inWatchlist, countries, cast}) => {
                           <Image
                             key={stream.provider_id}
                             source={{
-                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                              uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE_SMALL}/${stream.logo_path}`,
                             }}
                             style={styles.streamImage}
                           />
@@ -315,7 +315,7 @@ const Movie = ({movie, close, isHearted, inWatchlist, countries, cast}) => {
                           <Image
                             key={stream.provider_id}
                             source={{
-                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                              uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE_SMALL}/${stream.logo_path}`,
                             }}
                             style={styles.streamImage}
                           />
@@ -328,7 +328,7 @@ const Movie = ({movie, close, isHearted, inWatchlist, countries, cast}) => {
                           <Image
                             key={stream.provider_id}
                             source={{
-                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                              uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE_SMALL}/${stream.logo_path}`,
                             }}
                             style={styles.streamImage}
                           />
@@ -351,7 +351,7 @@ const Movie = ({movie, close, isHearted, inWatchlist, countries, cast}) => {
                   <ImageBackground
                     key={c.id}
                     source={{
-                      uri: `https://image.tmdb.org/t/p/w500${c.profile_path}`,
+                      uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${c.profile_path}`,
                     }}
                     style={styles.castImage}
                     imageStyle={{borderRadius: 8}}>

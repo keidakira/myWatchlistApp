@@ -3,8 +3,7 @@ const Config = {
   TMDB_URL: 'https://api.themoviedb.org/3',
   TMDB_IMAGE_URL: 'https://image.tmdb.org/t/p',
   TMDB_IMAGE_SIZE: 'w500',
-  TMDB_IMAGE_SIZE_LARGE: 'w1280',
-  TMDB_IMAGE_SIZE_SMALL: 'w300',
+  TMDB_IMAGE_SIZE_SMALL: 'w200',
   SERVER_URL: 'https://fancy-pants-calf.cyclic.app',
 };
 

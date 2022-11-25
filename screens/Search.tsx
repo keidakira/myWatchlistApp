@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import CustomText from '../components/CustomText';
 import Separator from '../components/Separator';
+import Config from '../config';
 import MovieScreen from './MovieScreen';
 import TVScreen from './TVScreen';
 
@@ -77,7 +78,7 @@ const SearchScreen = () => {
                     <Image
                       style={styles.searchResultImage}
                       source={{
-                        uri: `https://image.tmdb.org/t/p/w500/${item.poster_path}`,
+                        uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}/${item.poster_path}`,
                       }}
                       borderRadius={8}
                     />
