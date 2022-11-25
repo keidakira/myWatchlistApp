@@ -392,7 +392,7 @@ const useMovie = movieId => {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`https://fancy-pants-calf.cyclic.app/movie/${movieId}`)
+    fetch(`${Config.SERVER_URL}/movie/${movieId}`)
       .then(response => response.json())
       .then(data => {
         setData(data);
