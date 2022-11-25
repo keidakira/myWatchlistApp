@@ -78,7 +78,7 @@ const HomeScreen = () => {
                     <Image
                       style={styles.posterImage}
                       source={{
-                        uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                        uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${item.poster_path}`,
                       }}
                     />
                   </View>
@@ -103,7 +103,7 @@ const HomeScreen = () => {
                     <Image
                       style={styles.posterImage}
                       source={{
-                        uri: `https://image.tmdb.org/t/p/w500${item.poster_path}`,
+                        uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${item.poster_path}`,
                       }}
                     />
                   </View>

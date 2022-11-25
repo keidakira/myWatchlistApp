@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import CustomText from '../components/CustomText';
 import Separator from '../components/Separator';
+import Config from '../config';
 import Database from '../utils/Database';
 import MovieScreen from './MovieScreen';
 import TVScreen from './TVScreen';
@@ -58,7 +59,7 @@ const HeartsScreen = () => {
                     <Image
                       style={styles.searchResultImage}
                       source={{
-                        uri: `https://image.tmdb.org/t/p/w500/${item.poster}`,
+                        uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}/${item.poster}`,
                       }}
                       borderRadius={8}
                     />

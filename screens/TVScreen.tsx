@@ -195,7 +195,7 @@ const TV = ({
       <ImageBackground
         style={{width: '100%', height: 256}}
         source={{
-          uri: `https://image.tmdb.org/t/p/w500${tv.backdrop_path}`,
+          uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${tv.backdrop_path}`,
         }}>
         <View style={styles.imageBackdrop} />
         <Text style={styles.tvTitle} numberOfLines={2}>
@@ -341,7 +341,7 @@ const TV = ({
                 <View style={styles.row}>
                   <Image
                     source={{
-                      uri: `https://image.tmdb.org/t/p/w500${ep.still_path}`,
+                      uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${ep.still_path}`,
                     }}
                     style={styles.episodeImage}
                   />
@@ -393,7 +393,7 @@ const TV = ({
                           <Image
                             key={stream.provider_id}
                             source={{
-                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                              uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE_SMALL}/${stream.logo_path}`,
                             }}
                             style={styles.streamImage}
                           />
@@ -415,7 +415,7 @@ const TV = ({
                           <Image
                             key={stream.provider_id}
                             source={{
-                              uri: `https://image.tmdb.org/t/p/w200/${stream.logo_path}`,
+                              uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE_SMALL}/${stream.logo_path}`,
                             }}
                             style={styles.streamImage}
                           />
@@ -438,7 +438,7 @@ const TV = ({
                   <ImageBackground
                     key={c.id}
                     source={{
-                      uri: `https://image.tmdb.org/t/p/w500${c.profile_path}`,
+                      uri: `${Config.TMDB_IMAGE_URL}/${Config.TMDB_IMAGE_SIZE}${c.profile_path}`,
                     }}
                     style={styles.castImage}
                     imageStyle={{borderRadius: 8}}>
